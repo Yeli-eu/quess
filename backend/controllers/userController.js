@@ -1,5 +1,6 @@
 const db = require('../models/db');
 const { validateVerificationCode, incrementCodeUseCount } = require('../utils/codeGenerator');
+const { buildStandardOptionCombination, buildLegacyOptionCombination } = require('../utils/resultRuleNormalizer');
 
 // 验证验证码有效性，返回绑定的问卷信息
 const verifyCode = async (req, res) => {
@@ -69,14 +70,23 @@ const matchResult = async (req, res) => {
       WHERE survey_id = ? 
       ORDER BY create_time ASC
     `, [surveyId]);
-    // 按题目顺序拼接选项Key，例：A,B,C 或 1A,2B,3C
-    const optionCombination = questions.map(question => answer[question.id]).join(',');
+    // 按题目顺序拼接为标准格式：1A,2B,3C
+    const standardOptionCombination = buildStandardOptionCombination(questions, answer);
 
-    // 步骤2：根据「问卷ID+选项组合」匹配结果规则
-    const resultRule = await db.getAsync(`
+    // 步骤2：优先按标准格式匹配，未命中则兜底按旧格式匹配（兼容历史数据）
+    let resultRule = await db.getAsync(`
       SELECT result_name, result_content, result_image FROM result_rules 
       WHERE survey_id = ? AND option_combination = ?
-    `, [surveyId, optionCombination]);
+    `, [surveyId, standardOptionCombination]);
+
+    if (!resultRule) {
+      const legacyOptionCombination = buildLegacyOptionCombination(questions, answer);
+      resultRule = await db.getAsync(`
+        SELECT result_name, result_content, result_image FROM result_rules 
+        WHERE survey_id = ? AND option_combination = ?
+      `, [surveyId, legacyOptionCombination]);
+    }
+
     if (!resultRule) {
       return res.json({ code: 400, message: '暂无匹配的结果规则，请联系管理员配置' });
     }

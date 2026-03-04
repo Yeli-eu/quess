@@ -31,10 +31,12 @@ app.use('*', (req, res) => {
 });
 
 // 启动服务
-app.listen(PORT, () => {
-  console.log(`✅ 问卷调查后端服务启动成功`);
-  console.log(`✅ 服务运行地址：http://localhost:${PORT}`);
-  console.log(`✅ 接口基础地址：http://localhost:${PORT}/api`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log('✅ 问卷调查后端服务启动成功');
+  console.log(`✅ 后端服务地址：http://139.217.73.140:${PORT}`);
+  console.log(`✅ 后端接口地址：http://139.217.73.140:${PORT}/api`);
+  console.log(`✅ 管理员后台地址：http://139.217.73.140:8080/#/admin/login`);
+  console.log(`✅ 用户端访问地址：http://139.217.73.140:8080`);
 });
 
 module.exports = app;

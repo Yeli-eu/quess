@@ -2,6 +2,7 @@ const db = require('../models/db');
 const moment = require('moment');
 const { generateToken } = require('../middleware/auth');
 const { generateUniqueCode } = require('../utils/codeGenerator');
+const { normalizeOptionCombination } = require('../utils/resultRuleNormalizer');
 
 // 管理员登录：固定账号admin，密码12345678
 const adminLogin = async (req, res) => {
@@ -214,18 +215,19 @@ const getResultRuleList = async (req, res) => {
 const addResultRule = async (req, res) => {
   try {
     const { survey_id, option_combination, result_name, result_content, result_image } = req.body;
+    const normalizedOptionCombination = normalizeOptionCombination(option_combination);
     // 校验组合是否重复（同一问卷）
     const exist = await db.getAsync(`
       SELECT id FROM result_rules 
       WHERE survey_id = ? AND option_combination = ?
-    `, [survey_id, option_combination]);
+    `, [survey_id, normalizedOptionCombination]);
     if (exist) {
       return res.json({ code: 400, message: '该选项组合已存在，请更换' });
     }
     await db.runAsync(`
       INSERT INTO result_rules (survey_id, option_combination, result_name, result_content, result_image) 
       VALUES (?, ?, ?, ?, ?)
-    `, [survey_id, option_combination, result_name, result_content, result_image || '']);
+    `, [survey_id, normalizedOptionCombination, result_name, result_content, result_image || '']);
     res.json({ code: 200, message: '结果规则新增成功' });
   } catch (error) {
     console.error('新增结果规则失败：', error);
@@ -237,13 +239,14 @@ const addResultRule = async (req, res) => {
 const editResultRule = async (req, res) => {
   try {
     const { id, option_combination, result_name, result_content, result_image } = req.body;
+    const normalizedOptionCombination = normalizeOptionCombination(option_combination);
     // 获取当前规则的问卷ID
     const rule = await db.getAsync(`SELECT survey_id FROM result_rules WHERE id = ?`, [id]);
     // 校验组合是否重复（排除自身）
     const exist = await db.getAsync(`
       SELECT id FROM result_rules 
       WHERE survey_id = ? AND option_combination = ? AND id != ?
-    `, [rule.survey_id, option_combination, id]);
+    `, [rule.survey_id, normalizedOptionCombination, id]);
     if (exist) {
       return res.json({ code: 400, message: '该选项组合已存在，请更换' });
     }
@@ -251,7 +254,7 @@ const editResultRule = async (req, res) => {
       UPDATE result_rules 
       SET option_combination = ?, result_name = ?, result_content = ?, result_image = ?
       WHERE id = ?
-    `, [option_combination, result_name, result_content, result_image || '', id]);
+    `, [normalizedOptionCombination, result_name, result_content, result_image || '', id]);
     res.json({ code: 200, message: '结果规则编辑成功' });
   } catch (error) {
     console.error('编辑结果规则失败：', error);

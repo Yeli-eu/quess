@@ -290,7 +290,7 @@
         <el-form-item label="选择组合" prop="option_combination">
           <el-input
             v-model="resultRuleForm.option_combination"
-            placeholder="例：A1,B2,C3（题目1选A，题目2选B，题目3选C）"
+            placeholder="例：1A,2B,3C（题目1选A，题目2选B，题目3选C）"
             show-word-limit
             maxlength="50"
           />

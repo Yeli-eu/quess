@@ -174,7 +174,9 @@ export default {
       this.dialogVisible = true
       // 重置表单校验
       this.$nextTick(() => {
-        this.$refs.surveyFormRef.resetFields()
+        if (this.$refs.resultRuleFormRef && this.$refs.resultRuleFormRef.clearValidate) {
+      this.$refs.resultRuleFormRef.clearValidate()
+    }
       })
     },
     // 保存问卷（新建/编辑）

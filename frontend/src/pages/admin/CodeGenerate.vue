@@ -35,6 +35,14 @@
             >
               生成兑换码
             </el-button>
+            <el-button
+              size="large"
+              icon="el-icon-generate"
+              :loading="loading"
+              @click="goBack"
+            >
+              返回管理首页
+            </el-button>
           </el-form-item>
         </el-form>
 
@@ -140,6 +148,9 @@ export default {
       document.execCommand('copy')
       document.body.removeChild(input)
       this.$message.success('文案复制成功')
+    },
+    goBack() {
+      this.$router.push('/admin/survey');
     }
   }
 }

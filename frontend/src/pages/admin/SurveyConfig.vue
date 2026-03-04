@@ -448,7 +448,9 @@ export default {
       this.questionForm = { ...row }
       this.questionDialogVisible = true
       this.$nextTick(() => {
-        this.$refs.questionFormRef.resetFields()
+        if (this.$refs.questionFormRef && this.$refs.questionFormRef.clearValidate) {
+      this.$refs.questionFormRef.clearValidate()
+        }
       })
     },
     // 保存题目
@@ -538,7 +540,9 @@ export default {
       this.optionForm = { ...row }
       this.optionDialogVisible = true
       this.$nextTick(() => {
-        this.$refs.optionFormRef.resetFields()
+        if (this.$refs.optionFormRef && this.$refs.optionFormRef.clearValidate) {
+      this.$refs.optionFormRef.clearValidate()
+    }
       })
     },
     // 保存选项
@@ -623,7 +627,9 @@ export default {
       this.resultRuleForm = { ...row }
       this.resultRuleDialogVisible = true
       this.$nextTick(() => {
-        this.$refs.resultRuleFormRef.resetFields()
+        if (this.$refs.resultRuleFormRef && this.$refs.resultRuleFormRef.clearValidate) {
+      this.$refs.resultRuleFormRef.clearValidate()
+    }
       })
     },
     // 保存结果规则
